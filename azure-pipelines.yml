@@ -1,20 +1,15 @@
+trigger:
+- main
 
-pool: new-agent
+pool: Default
 
 variables:
-  buildConfiguration: 'Release'  
+  buildConfiguration: 'Release'
 
+# do this before all your .NET Core tasks
 steps:
-- task: Bash@3
+- task: DotNetCoreInstaller@2
   inputs:
-    targetType: 'inline'
-    script: |
-      # Write your commands here
-      
-      echo 'Hello world'
-- task: DotNetCoreCLI@2
-  inputs:
-    command: 'build'
+    version: '2.2.402' # replace this value with the version that you need for your project
 - script: dotnet build --configuration $(buildConfiguration)
-
-
+  displayName: 'dotnet build $(buildConfiguration)'
