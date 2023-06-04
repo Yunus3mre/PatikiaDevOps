@@ -1,13 +1,58 @@
+trigger:
+  branches:
+    include:
+      - main
+
+jobs:
+- job: Build
+  displayName: 'Build job'
+  pool:
+    vmImage: 'ubuntu-latest'
+  steps:
+  - task: UseDotNet@2
+    inputs:
+      version: '3.x'
+  - script: dotnet build --configuration $(BuildConfiguration)
+    displayName: 'Build solution'
+  - task: DotNetCoreCLI@2
+    inputs:
+      command: 'test'
+      projects: '**/*Tests.csproj'
+      arguments: '--configuration $(BuildConfiguration)'
+    displayName: 'Run tests'
+  - task: DotNetCoreCLI@2
+    inputs:
+      command: 'publish'
+      publishWebProjects: true
+      arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)'
+    displayName: 'Publish application'
+
+- job: Deploy
+  displayName: 'Deploy job'
+  dependsOn: Build
+  condition: succeeded()
+  pool:
+    vmImage: 'ubuntu-latest'
+  steps:
+  - task: DownloadPipelineArtifact@2
+    inputs:
+      buildType: 'current'
+      artifactName: 'drop'
+      targetPath: '$(Pipeline.Workspace)'
+    displayName: 'Download published artifacts'
+  - task: Docker@2
+    inputs:
+      command: 'buildAndPush'
+      containerRegistry: 'yourContainerRegistry'
+      repository: 'yourDockerRepository'
+      dockerfile: '**/Dockerfile'
+      buildContext: '$(Pipeline.Workspace)'
+    displayName: 'Build and push Docker image'
+  - task: AzureWebAppContainerDeploy@1
+    inputs:
+      azureSubscription: 'yourAzureSubscription'
+      appName: 'yourWebAppName'
+      images: 'yourDockerRepository/yourImageName:$(Build.BuildId)'
+    displayName: 'Deploy to Azure Web App'
 
 
-pool: new-agent
-  
-
-steps:
-- task: Bash@3
-  inputs:
-    targetType: 'inline'
-    script: |
-      # Write your commands here
-      
-      echo 'Hello world'
