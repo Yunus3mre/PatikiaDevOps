@@ -1,7 +1,5 @@
 pool: new-agent
 
-variables:
-  buildConfiguration: 'Release'
 
 
 steps:
@@ -9,12 +7,5 @@ steps:
   inputs:
     targetType: 'inline'
     script: | 
-      dotnet build --configuration $(buildConfiguration)
-      # Write your commands here
-      
-      echo 'Hello world'
-- task: DotNetCoreCLI@2
-  inputs:
-    command: 'build'
-- script: dotnet build --configuration $(buildConfiguration)
-  displayName: 'dotnet build $(buildConfiguration)'
+      dotnet build $(Build.SourcesDirectory)/backend/backend.csproj -c Release -o /Users/emresavan/export
+      dotnet publish $(Build.SourcesDirectory)/backend/backend.csproj -c Release -o /Users/emresavan/export /p:UseAppHost=false
