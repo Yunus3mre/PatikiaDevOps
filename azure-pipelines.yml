@@ -1,5 +1,4 @@
 
-
 pool: new-agent
   
 
@@ -11,3 +10,8 @@ steps:
       # Write your commands here
       
       echo 'Hello world'
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'build'
+
+
